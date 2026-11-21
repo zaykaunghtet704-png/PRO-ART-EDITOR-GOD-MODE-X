@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: pro-art-editor-god-mode-x-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: PRO ART EDITOR GOD MODE X
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pro-art-editor-db
+          property: connectionString
+
+  - type: worker
+    name: pro-art-editor-god-mode-x-bot
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    dockerCommand: python bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: APP_NAME
+        value: PRO ART EDITOR GOD MODE X
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pro-art-editor-db
+          property: connectionString
+
+databases:
+  - name: pro-art-editor-db
+    plan: basic-256mb
+    databaseName: pro_art_editor
+    user: pro_art_editor
